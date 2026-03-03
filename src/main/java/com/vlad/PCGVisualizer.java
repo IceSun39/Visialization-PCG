@@ -1,5 +1,6 @@
 package com.vlad;
 
+import com.vlad.Model.PCG32;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -7,6 +8,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import com.vlad.Model.PCG32;
 
 public class PCGVisualizer extends Application {
 

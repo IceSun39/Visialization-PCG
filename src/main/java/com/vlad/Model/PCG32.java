@@ -1,10 +1,10 @@
-package com.vlad;
+package com.vlad.Model;
 
 public class PCG32 {
     private long state;
     private final long inc;
 
-    PCG32(long seed, long streamId){
+    public PCG32(long seed, long streamId){
         this.state = 0;
         this.inc = (streamId << 1) | 1;
         nextInt();
