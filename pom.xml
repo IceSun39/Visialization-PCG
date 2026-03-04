@@ -38,7 +38,7 @@
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
-          <mainClass>/home/vlad/Documents/2 курс/2 семестр/Курсова/Код/Course Work Maven/src/main/java/com/vlad/PCGVisualizer.java</mainClass>
+          <mainClass>com.vlad.Main</mainClass>
         </configuration>
       </plugin>
     </plugins>
