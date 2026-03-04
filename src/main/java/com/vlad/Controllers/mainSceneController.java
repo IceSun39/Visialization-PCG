@@ -1,6 +1,7 @@
 package com.vlad.Controllers;
 
 import com.vlad.Model.PCG32;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -31,7 +32,7 @@ public class mainSceneController {
     @FXML
     private Label errorNotNumberLabel;
 
-    private long samples;
+    private long paintedDots;
 
     private PCG32 rng;
 
@@ -49,40 +50,60 @@ public class mainSceneController {
         rng = new PCG32(42L, 54L);
     }
 
+    private void showError(String massage){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Помилка введення");
+        alert.setHeaderText(null);
+        alert.setContentText(massage);
+        alert.showAndWait();
+    }
+
     @FXML
     public void startDrawing(ActionEvent event) throws IOException {
-        String input = countDots.getText();
+        String input = countDots.getText().trim();
         try {
-            samples = Long.parseLong(input);
+            long samples = Long.parseLong(input);
 
             if(samples < 0){
                 throw new IllegalArgumentException();
             }
 
-            for (int i = 0; i < samples; i++) {
-                double x = rng.nextDouble();
-                double y = rng.nextDouble();
+            // Створюємо новий потік, щоб інтерфейс не "зависав"
+            new Thread(() -> {
+                for (int i = 0; i < samples; i++) {
+                    double x = rng.nextDouble();
+                    double y = rng.nextDouble();
 
-                double px = x * canvas.getWidth();
-                double py = y * canvas.getHeight();
+                    // Малюємо через Platform.runLater
+                    Platform.runLater(() -> {
+                        gc.fillRect(x * canvas.getWidth(), y * canvas.getHeight(), 1, 1);
+                        paintedDots += 1;
+                        countPaintedDots.setText(String.valueOf(paintedDots));
+                    });
 
+                    try {
+                        double sliderValue = speedSlider.getValue();
+                        long delay = (long) (101 - sliderValue);
 
-                gc.fillRect(px, py, 1, 1);
-            }
+                        Thread.sleep(delay);
+                    } catch (InterruptedException e) {
+                        break; // Вихід, якщо потік перервано
+                    }
+                }
+            }).start();
         }catch (NumberFormatException e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Помилка введення");
-            alert.setHeaderText(null);
-            alert.setContentText("Кількість точок повинна бути числом!");
-            alert.showAndWait();
+            showError("Кількість точок повинна бути числом!");
         }catch (IllegalArgumentException e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Помилка введення");
-            alert.setHeaderText(null);
-            alert.setContentText("Кількість точок повинна бути додатним числом!");
-            alert.showAndWait();
+            showError("Кількість точок повинна бути додатним числом!");
         }
 
+    }
+
+    @FXML
+    public void clearCanvas(){
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        countPaintedDots.setText("0");
     }
 
 }
