@@ -22,6 +22,8 @@ public class mainSceneController {
     @FXML
     private Button stopButton;
     @FXML
+    private Button continueButton;
+    @FXML
     private Slider speedSlider;
     @FXML
     private TextArea countDots;
@@ -38,6 +40,8 @@ public class mainSceneController {
 
     private GraphicsContext gc;
 
+    private volatile boolean isRunning = false;
+
     @FXML
     void initialize(){
         gc = canvas.getGraphicsContext2D();
@@ -48,6 +52,8 @@ public class mainSceneController {
         gc.setFill(Color.WHITE);
 
         rng = new PCG32(42L, 54L);
+
+        paintedDots = 0;
     }
 
     private void showError(String massage){
@@ -60,8 +66,10 @@ public class mainSceneController {
 
     @FXML
     public void startDrawing(ActionEvent event) throws IOException {
-        String input = countDots.getText().trim();
+        isRunning = true;
+
         try {
+            String input = countDots.getText().trim();
             long samples = Long.parseLong(input);
 
             if(samples < 0){
@@ -69,8 +77,12 @@ public class mainSceneController {
             }
 
             // Створюємо новий потік, щоб інтерфейс не "зависав"
-            new Thread(() -> {
-                for (int i = 0; i < samples; i++) {
+            Thread paintThread = new Thread(() -> {
+                for (long i = paintedDots; i < samples; i++) {
+                    if(!isRunning){
+                        break;
+                    }
+
                     double x = rng.nextDouble();
                     double y = rng.nextDouble();
 
@@ -90,7 +102,10 @@ public class mainSceneController {
                         break; // Вихід, якщо потік перервано
                     }
                 }
-            }).start();
+            });
+            paintThread.setDaemon(true);
+            paintThread.start();
+
         }catch (NumberFormatException e){
             showError("Кількість точок повинна бути числом!");
         }catch (IllegalArgumentException e){
@@ -101,9 +116,17 @@ public class mainSceneController {
 
     @FXML
     public void clearCanvas(){
+        isRunning = false;
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gc.setFill(Color.WHITE);
         countPaintedDots.setText("0");
+        paintedDots = 0;
+    }
+
+    @FXML
+    public void stopDrawing(){
+        isRunning = false;
     }
 
 }

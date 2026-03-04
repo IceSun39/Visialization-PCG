@@ -1,6 +1,7 @@
 package com.vlad;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -21,6 +22,11 @@ public class Main extends Application {
             });
 
             stage.show();
+
+        stage.setOnCloseRequest(t -> {
+            Platform.exit();
+            System.exit(0);
+        });
     }
 
     public static void main(String[] args) {
