@@ -76,7 +76,7 @@ public class mainSceneController {
                 throw new IllegalArgumentException();
             }
 
-            // Створюємо новий потік, щоб інтерфейс не "зависав"
+            // Створюємо новий потік, щоб інтерфейс не зависав
             Thread paintThread = new Thread(() -> {
                 for (long i = paintedDots; i < samples; i++) {
                     if(!isRunning){
