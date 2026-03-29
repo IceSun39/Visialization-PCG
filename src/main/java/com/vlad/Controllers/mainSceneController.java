@@ -26,7 +26,9 @@ public class mainSceneController {
     @FXML
     private Slider speedSlider;
     @FXML
-    private TextArea countDots;
+    private TextArea countArea  ;
+    @FXML
+    private  TextArea seedArea;
     @FXML
     private Label countPaintedDots;
     @FXML
@@ -51,8 +53,6 @@ public class mainSceneController {
 
         gc.setFill(Color.WHITE);
 
-        rng = new PCG32(42L, 54L);
-
         paintedDots = 0;
     }
 
@@ -64,54 +64,92 @@ public class mainSceneController {
         alert.showAndWait();
     }
 
+    private long checkSamples() {
+        long samples = 0;
+        try {
+            String input = countArea.getText().trim();
+            samples = Long.parseLong(input);
+
+            if (samples <= 0) {
+                throw new IllegalArgumentException();
+            }
+
+        // Якщо нічого не ввели або не ввели число
+        } catch (NumberFormatException e) {
+            showError("Кількість точок повинна бути числом!");
+            isRunning = false;
+        // Якщо ввели від'ємне число
+        } catch (IllegalArgumentException e) {
+            showError("Кількість точок повинна бути більше за нуль!");
+            isRunning = false;
+        }
+
+        return samples;
+    }
+
+    private long checkSeed(){
+        long seed = 0;
+        try {
+            String input = seedArea.getText().trim();
+            seed = Long.parseLong(input);
+
+            if (seed < 0) {
+                throw new IllegalArgumentException();
+            }
+
+        // Якщо нічого не ввели або не ввели число
+        } catch (NumberFormatException e) {
+            showError("Кількість точок повинна бути числом!");
+            isRunning = false;
+        // Якщо ввели від'ємне число
+        } catch (IllegalArgumentException e) {
+            showError("Кількість точок повинна бути додатним числом!");
+            isRunning = false;
+        }
+
+        return seed;
+    }
+
     @FXML
     public void startDrawing(ActionEvent event) throws IOException {
         isRunning = true;
 
-        try {
-            String input = countDots.getText().trim();
-            long samples = Long.parseLong(input);
 
-            if(samples < 0){
-                throw new IllegalArgumentException();
-            }
+        long samples = checkSamples();
 
-            // Створюємо новий потік, щоб інтерфейс не зависав
-            Thread paintThread = new Thread(() -> {
-                for (long i = paintedDots; i < samples; i++) {
-                    if(!isRunning){
-                        break;
-                    }
+        long seed = checkSeed();
 
-                    double x = rng.nextDouble();
-                    double y = rng.nextDouble();
+        rng = new PCG32(seed, 54L);
 
-                    // Малюємо через Platform.runLater
-                    Platform.runLater(() -> {
-                        gc.fillRect(x * canvas.getWidth(), y * canvas.getHeight(), 1, 1);
-                        paintedDots += 1;
-                        countPaintedDots.setText(String.valueOf(paintedDots));
-                    });
-
-                    try {
-                        double sliderValue = speedSlider.getValue();
-                        long delay = (long) (101 - sliderValue);
-
-                        Thread.sleep(delay);
-                    } catch (InterruptedException e) {
-                        break; // Вихід, якщо потік перервано
-                    }
+        // Створюємо новий потік, щоб інтерфейс не зависав
+        Thread paintThread = new Thread(() -> {
+            for (long i = paintedDots; i < samples; i++) {
+                if(!isRunning){
+                    break;
                 }
-            });
-            paintThread.setDaemon(true);
-            paintThread.start();
 
-        }catch (NumberFormatException e){
-            showError("Кількість точок повинна бути числом!");
-        }catch (IllegalArgumentException e){
-            showError("Кількість точок повинна бути додатним числом!");
-        }
+                double x = rng.nextDouble();
+                double y = rng.nextDouble();
 
+                // Малюємо через Platform.runLater
+                Platform.runLater(() -> {
+                    gc.fillRect(x * canvas.getWidth(), y * canvas.getHeight(), 1, 1);
+                    paintedDots += 1;
+                    countPaintedDots.setText(String.valueOf(paintedDots));
+                });
+
+                try {
+                    double sliderValue = speedSlider.getValue();
+                    long delay = (long) (101 - sliderValue);
+
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    break; // Вихід, якщо потік перервано
+                }
+            }
+        });
+        paintThread.setDaemon(true);
+        paintThread.start();
     }
 
     @FXML
