@@ -10,6 +10,8 @@ import javafx.scene.paint.Color;
 
 import javafx.event.ActionEvent;
 import java.io.IOException;
+import java.util.ArrayList;
+
 
 public class mainSceneController {
 
@@ -42,9 +44,9 @@ public class mainSceneController {
 
     private GraphicsContext mainGc;
 
-    private GraphicsContext extraGc;
-
     private volatile boolean isRunning = false;
+
+    private ArrayList history;
 
     @FXML
     void initialize(){
@@ -125,6 +127,7 @@ public class mainSceneController {
 
                 double x = rng.nextDouble();
                 double y = rng.nextDouble();
+                history.add(x);
 
                 // Малюємо через Platform.runLater
                 Platform.runLater(() -> {
