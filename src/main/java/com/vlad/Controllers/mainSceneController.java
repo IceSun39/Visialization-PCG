@@ -14,7 +14,7 @@ import java.io.IOException;
 public class mainSceneController {
 
     @FXML
-    private Canvas canvas;
+    private Canvas mainCanvas;
     @FXML
     private Button startButton;
     @FXML
@@ -40,18 +40,19 @@ public class mainSceneController {
 
     private PCG32 rng;
 
-    private GraphicsContext gc;
+    private GraphicsContext mainGc;
+
+    private GraphicsContext extraGc;
 
     private volatile boolean isRunning = false;
 
     @FXML
     void initialize(){
-        gc = canvas.getGraphicsContext2D();
+        mainGc = mainCanvas.getGraphicsContext2D();
 
-        gc.setFill(Color.BLACK);
-        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-        gc.setFill(Color.WHITE);
+        mainGc.setFill(Color.BLACK);
+        mainGc.fillRect(0, 0, mainCanvas.getWidth(), mainCanvas.getHeight());
+        mainGc.setFill(Color.WHITE);
 
         paintedDots = 0;
     }
@@ -74,7 +75,7 @@ public class mainSceneController {
                 throw new IllegalArgumentException();
             }
 
-        // Якщо нічого не ввели або не ввели число
+        // Якщо нічого не ввели або ввели не число
         } catch (NumberFormatException e) {
             showError("Кількість точок повинна бути числом!");
             isRunning = false;
@@ -93,17 +94,9 @@ public class mainSceneController {
             String input = seedArea.getText().trim();
             seed = Long.parseLong(input);
 
-            if (seed < 0) {
-                throw new IllegalArgumentException();
-            }
-
-        // Якщо нічого не ввели або не ввели число
+        // Якщо нічого не ввели або ввели не число
         } catch (NumberFormatException e) {
-            showError("Кількість точок повинна бути числом!");
-            isRunning = false;
-        // Якщо ввели від'ємне число
-        } catch (IllegalArgumentException e) {
-            showError("Кількість точок повинна бути додатним числом!");
+            showError("Зерно повинно бути цілим числом!");
             isRunning = false;
         }
 
@@ -113,7 +106,6 @@ public class mainSceneController {
     @FXML
     public void startDrawing(ActionEvent event) throws IOException {
         isRunning = true;
-
 
         long samples = checkSamples();
 
@@ -125,15 +117,18 @@ public class mainSceneController {
         Thread paintThread = new Thread(() -> {
             for (long i = paintedDots; i < samples; i++) {
                 if(!isRunning){
+                    seedArea.setEditable(true);
                     break;
                 }
+
+                seedArea.setEditable(false);
 
                 double x = rng.nextDouble();
                 double y = rng.nextDouble();
 
                 // Малюємо через Platform.runLater
                 Platform.runLater(() -> {
-                    gc.fillRect(x * canvas.getWidth(), y * canvas.getHeight(), 1, 1);
+                    mainGc.fillRect(x * mainCanvas.getWidth(), y * mainCanvas.getHeight(), 1, 1);
                     paintedDots += 1;
                     countPaintedDots.setText(String.valueOf(paintedDots));
                 });
@@ -144,6 +139,7 @@ public class mainSceneController {
 
                     Thread.sleep(delay);
                 } catch (InterruptedException e) {
+                    seedArea.setEditable(true);
                     break; // Вихід, якщо потік перервано
                 }
             }
@@ -155,9 +151,11 @@ public class mainSceneController {
     @FXML
     public void clearCanvas(){
         isRunning = false;
-        gc.setFill(Color.BLACK);
-        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        gc.setFill(Color.WHITE);
+
+        mainGc.setFill(Color.BLACK);
+        mainGc.fillRect(0, 0, mainCanvas.getWidth(), mainCanvas.getHeight());
+        mainGc.setFill(Color.WHITE);
+
         countPaintedDots.setText("0");
         paintedDots = 0;
     }
