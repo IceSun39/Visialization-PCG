@@ -1,5 +1,7 @@
 package com.vlad.Controllers;
 
+import com.vlad.Model.GeneratorContext;
+import com.vlad.Model.IterationState;
 import com.vlad.Model.PCG32;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -10,8 +12,6 @@ import javafx.scene.paint.Color;
 
 import javafx.event.ActionEvent;
 import java.io.IOException;
-import java.util.ArrayList;
-
 
 public class mainSceneController {
 
@@ -42,19 +42,17 @@ public class mainSceneController {
 
     private PCG32 rng;
 
-    private GraphicsContext mainGc;
+    private GraphicsContext gc;
 
     private volatile boolean isRunning = false;
 
-    private ArrayList history;
-
     @FXML
     void initialize(){
-        mainGc = mainCanvas.getGraphicsContext2D();
+        gc = mainCanvas.getGraphicsContext2D();
 
-        mainGc.setFill(Color.BLACK);
-        mainGc.fillRect(0, 0, mainCanvas.getWidth(), mainCanvas.getHeight());
-        mainGc.setFill(Color.WHITE);
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0, 0, mainCanvas.getWidth(), mainCanvas.getHeight());
+        gc.setFill(Color.WHITE);
 
         paintedDots = 0;
     }
@@ -114,6 +112,7 @@ public class mainSceneController {
         long seed = checkSeed();
 
         rng = new PCG32(seed, 54L);
+        GeneratorContext generatorContext = new GeneratorContext(rng);
 
         // Створюємо новий потік, щоб інтерфейс не зависав
         Thread paintThread = new Thread(() -> {
@@ -125,13 +124,12 @@ public class mainSceneController {
 
                 seedArea.setEditable(false);
 
-                double x = rng.nextDouble();
-                double y = rng.nextDouble();
-                history.add(x);
+                generatorContext.performSingleStep();
+                IterationState currentStep = generatorContext.getHistory().getLast();
 
                 // Малюємо через Platform.runLater
                 Platform.runLater(() -> {
-                    mainGc.fillRect(x * mainCanvas.getWidth(), y * mainCanvas.getHeight(), 1, 1);
+                    gc.fillRect(currentStep.getXValue() * mainCanvas.getWidth(), currentStep.getYValue() * mainCanvas.getHeight(), 1, 1);
                     paintedDots += 1;
                     countPaintedDots.setText(String.valueOf(paintedDots));
                 });
@@ -155,9 +153,9 @@ public class mainSceneController {
     public void clearCanvas(){
         isRunning = false;
 
-        mainGc.setFill(Color.BLACK);
-        mainGc.fillRect(0, 0, mainCanvas.getWidth(), mainCanvas.getHeight());
-        mainGc.setFill(Color.WHITE);
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0, 0, mainCanvas.getWidth(), mainCanvas.getHeight());
+        gc.setFill(Color.WHITE);
 
         countPaintedDots.setText("0");
         paintedDots = 0;

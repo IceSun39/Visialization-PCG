@@ -1,41 +1,38 @@
 package com.vlad.Model;
 
+import java.util.ArrayList; // Додайте цей імпорт
 import java.util.List;
 
-public class GeneratorContext{
+public class GeneratorContext {
     private PseudoRandomGenerator strategy;
-    private List<IterationState> history;
-    private GenerationMode currentMode;
+    private List<IterationState> history = new ArrayList<>();
 
-    GeneratorContext(PseudoRandomGenerator strategy){
+    public GeneratorContext(PseudoRandomGenerator strategy) {
         this.strategy = strategy;
     }
 
-    public void setStrategy(PseudoRandomGenerator strategy, GenerationMode mode) {
+    public void setStrategy(PseudoRandomGenerator strategy) {
         this.strategy = strategy;
-        this.currentMode = mode;
     }
 
     public List<IterationState> getHistory() {
         return history;
     }
 
-    public void clearHistory(){
-        history.clear();
+    public void clearHistory() {
+        if (history != null) {
+            history.clear();
+        }
     }
 
-    public void setCurrentMode(GenerationMode currentMode) {
-        this.currentMode = currentMode;
-    }
-
-    public void startGeneration(long count){
-        for(long i = 0; i < count; i++){
+    public void startGeneration(long count) {
+        for (long i = 0; i < count; i++) {
             performSingleStep();
         }
     }
 
-    public void performSingleStep(){
-        IterationState result =  strategy.generateNextStep();
+    public void performSingleStep() {
+        IterationState result = strategy.generateNextStep();
         history.add(result);
     }
 }
