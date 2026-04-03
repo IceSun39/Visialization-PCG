@@ -9,9 +9,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 
 import javafx.event.ActionEvent;
 import java.io.IOException;
+import java.io.File;
+import java.io.PrintWriter;
 
 import java.util.List;
 
@@ -43,6 +46,10 @@ public class mainSceneController {
     private long paintedDots;
 
     private GraphicsContext gc;
+
+    private PCG32 rng;
+
+    private GeneratorContext generatorContext;
 
     private volatile boolean isRunning = false;
 
@@ -111,8 +118,8 @@ public class mainSceneController {
 
         long seed = checkSeed();
 
-        PCG32 rng = new PCG32(seed, 54L);
-        GeneratorContext generatorContext = new GeneratorContext(rng);
+        rng = new PCG32(seed, 54L);
+        generatorContext = new GeneratorContext(rng);
 
         // Створюємо новий потік, щоб інтерфейс не зависав
         Thread paintThread = new Thread(() -> {
@@ -206,6 +213,56 @@ public class mainSceneController {
     @FXML
     public void stopDrawing(){
         isRunning = false;
+    }
+
+    @FXML
+    public void saveToFile() {
+        if (generatorContext == null || generatorContext.getHistory().isEmpty()) {
+            showInfo(Alert.AlertType.ERROR,"Помилка збереження", "Немає даних для збереження!");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Зберегти результати генерації");
+
+
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Текстові файли (*.txt)", "*.txt"),
+                new FileChooser.ExtensionFilter("CSV файли (*.csv)", "*.csv")
+        );
+
+        // Відкриваємо вікно "Зберегти як"
+        File file = fileChooser.showSaveDialog(mainCanvas.getScene().getWindow());
+
+        if (file != null) {
+            saveData(file);
+        }
+    }
+
+    private void saveData(File file) {
+        String fileName = file.getName().toLowerCase();
+        String delimiter = fileName.endsWith(".csv") ? ";" : " ";
+
+        try (PrintWriter writer = new PrintWriter(file)) {
+            if (fileName.endsWith(".csv")) {
+                writer.println("Iteration" + delimiter + "X");
+            }
+
+            for (IterationState state : generatorContext.getHistory()) {
+                writer.printf("%d%s%.10f%n",
+                        state.getIterationNumber(),
+                        delimiter,
+                        state.getXValue()
+                );
+            }
+
+            // Додаємо вивід зерна в кінець файлу
+            writer.println(); // Порожній рядок для розділення
+            writer.println("Seed: " + seedArea.getText().trim());
+
+        } catch (IOException e) {
+            showInfo(Alert.AlertType.ERROR, "Помилка збереження",   "Помилка при записі у файл: " + e.getMessage());
+        }
     }
 
 }
