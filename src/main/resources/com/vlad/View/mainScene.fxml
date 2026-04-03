@@ -13,9 +13,9 @@
 <AnchorPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vlad.Controllers.mainSceneController">
    <children>
       <Canvas fx:id="mainCanvas" height="269.0" layoutX="562.0" layoutY="31.0" width="297.0" />
-      <Button fx:id="startButton" layoutX="65.0" layoutY="321.0" mnemonicParsing="false" onAction="#startDrawing" prefHeight="24.0" prefWidth="106.0" text="Почати" />
-      <Button fx:id="clearButton" layoutX="193.0" layoutY="373.0" mnemonicParsing="false" onAction="#clearCanvas" prefHeight="24.0" prefWidth="106.0" text="Очистити" />
-      <Button fx:id="stopButton" layoutX="193.0" layoutY="321.0" mnemonicParsing="false" onAction="#stopDrawing" prefWidth="105.0" text="Зупинити" />
+      <Button fx:id="startButton" layoutX="65.0" layoutY="321.0" mnemonicParsing="false" onAction="#startDrawing" prefHeight="24.0" prefWidth="160.0" text="Почати візуалізацію" />
+      <Button fx:id="clearButton" layoutX="277.0" layoutY="373.0" mnemonicParsing="false" onAction="#clearCanvas" prefHeight="24.0" prefWidth="160.0" text="Очистити" />
+      <Button fx:id="stopButton" layoutX="65.0" layoutY="426.0" mnemonicParsing="false" onAction="#stopDrawing" prefHeight="24.0" prefWidth="160.0" text="Зупинити" />
       <Slider fx:id="speedSlider" blockIncrement="1.0" layoutX="62.0" layoutY="273.0" min="1.0" value="50.0" />
       <Label layoutX="59.0" layoutY="233.0" text="Швидкість" />
       <Label layoutX="59.0" layoutY="128.0" text="Кількість точок" />
@@ -24,7 +24,7 @@
       <Label fx:id="countPaintedDots" layoutX="798.0" layoutY="321.0" prefHeight="16.0" prefWidth="61.0" text="0" />
       <Label fx:id="errorUnderZeroLabel" layoutX="190.0" layoutY="284.0" text="Будь ласка введіть число більше нуля" textFill="RED" visible="false" />
       <Label fx:id="errorNotNumberLabel" layoutX="189.0" layoutY="284.0" text="Будь ласка введіть число" textFill="RED" visible="false" />
-      <Button fx:id="continueButton" layoutX="67.0" layoutY="373.0" mnemonicParsing="false" onAction="#startDrawing" prefHeight="24.0" prefWidth="106.0" text="Продовжити" />
+      <Button fx:id="continueButton" layoutX="65.0" layoutY="373.0" mnemonicParsing="false" onAction="#startDrawing" prefHeight="24.0" prefWidth="160.0" text="Продовжити" />
       <Label layoutX="59.0" layoutY="187.0" text="Зерно" />
       <TextArea fx:id="seedArea" layoutX="182.0" layoutY="176.0" prefHeight="38.0" prefWidth="95.0" text="42" />
       <MenuBar layoutX="3.0" layoutY="1.0">
@@ -42,5 +42,6 @@
           </Menu>
         </menus>
       </MenuBar>
+      <Button layoutX="277.0" layoutY="321.0" mnemonicParsing="false" onAction="#quickGeneration" prefHeight="24.0" prefWidth="160.0" text="Швидко створити" />
    </children>
 </AnchorPane>

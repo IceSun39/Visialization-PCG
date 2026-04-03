@@ -13,6 +13,8 @@ import javafx.scene.paint.Color;
 import javafx.event.ActionEvent;
 import java.io.IOException;
 
+import java.util.List;
+
 public class mainSceneController {
 
     @FXML
@@ -40,8 +42,6 @@ public class mainSceneController {
 
     private long paintedDots;
 
-    private PCG32 rng;
-
     private GraphicsContext gc;
 
     private volatile boolean isRunning = false;
@@ -57,9 +57,9 @@ public class mainSceneController {
         paintedDots = 0;
     }
 
-    private void showError(String massage){
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Помилка введення");
+    private void showInfo(Alert.AlertType alertType, String title, String massage){
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(massage);
         alert.showAndWait();
@@ -77,11 +77,11 @@ public class mainSceneController {
 
         // Якщо нічого не ввели або ввели не число
         } catch (NumberFormatException e) {
-            showError("Кількість точок повинна бути числом!");
+            showInfo(Alert.AlertType.ERROR, "Помилка введення", "Кількість точок повинна бути числом!");
             isRunning = false;
         // Якщо ввели від'ємне число
         } catch (IllegalArgumentException e) {
-            showError("Кількість точок повинна бути більше за нуль!");
+            showInfo(Alert.AlertType.ERROR, "Помилка введення", "Кількість точок повинна бути більше за нуль!");
             isRunning = false;
         }
 
@@ -96,7 +96,7 @@ public class mainSceneController {
 
         // Якщо нічого не ввели або ввели не число
         } catch (NumberFormatException e) {
-            showError("Зерно повинно бути цілим числом!");
+            showInfo(Alert.AlertType.ERROR, "Помилка введення", "Зерно повинно бути цілим числом!");
             isRunning = false;
         }
 
@@ -111,7 +111,7 @@ public class mainSceneController {
 
         long seed = checkSeed();
 
-        rng = new PCG32(seed, 54L);
+        PCG32 rng = new PCG32(seed, 54L);
         GeneratorContext generatorContext = new GeneratorContext(rng);
 
         // Створюємо новий потік, щоб інтерфейс не зависав
@@ -147,6 +147,48 @@ public class mainSceneController {
         });
         paintThread.setDaemon(true);
         paintThread.start();
+    }
+
+    @FXML
+    public void quickGeneration(){
+        long samples = checkSamples();
+
+        long seed = checkSeed();
+
+        PCG32 rng = new PCG32(seed, 54L);
+        GeneratorContext generatorContext = new GeneratorContext(rng);
+        generatorContext.startGeneration(samples);
+
+        StringBuilder massage = new StringBuilder();
+        List<IterationState> history = generatorContext.getHistory();
+        int size = history.size();
+        if(size > 50){
+            massage.append("Перші 50 чисел ");
+            size = 50;
+        }
+        else{
+            String partOne;
+            String partTwo;
+            if(size == 1){
+                partOne = "Перше ";
+                partTwo = " число ";
+            }
+            else if(size == 2 || size == 3 || size == 4){
+                partOne = "Перші ";
+                partTwo = " числа ";
+            }
+            else{
+                partOne = "Перші ";
+                partTwo = " чисел ";
+            }
+            massage.append(partOne).append(size).append(partTwo);
+        }
+
+        for(int i = 0; i < size; i++){
+            massage.append(history.get(i).getXValue()).append(" ");
+        }
+
+        showInfo(Alert.AlertType.INFORMATION, "Генерація завершена", massage.toString());
     }
 
     @FXML
