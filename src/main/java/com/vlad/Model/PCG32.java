@@ -1,8 +1,9 @@
 package com.vlad.Model;
 
-public class PCG32 {
+public class PCG32 implements PseudoRandomGenerator             {
     private long state;
     private final long inc;
+    private int currentIteration = 0;
 
     public PCG32(long seed, long streamId){
         this.state = 0;
@@ -12,14 +13,22 @@ public class PCG32 {
         nextInt();
     }
 
-    public int nextInt(){
-        long oldState = this.state;
-        state = oldState * 6364136223846793005L + inc;
+    public void setSeed(long seed){
+        this.state = seed;
+    }
 
+    private long applyXorshift(long oldState){
         int xorshifted = (int)(((oldState >> 18) ^ oldState) >> 27);
         int rot = (int)(oldState >> 59);
 
         return Integer.rotateRight(xorshifted, rot);
+    }
+
+    public int nextInt(){
+        long oldState = this.state;
+        state = oldState * 6364136223846793005L + inc;
+
+        return (int) applyXorshift(state);
     }
 
     public int nextInt(int bound){
@@ -43,6 +52,16 @@ public class PCG32 {
         long combined = (high << 21) ^ (low >>> 11);
 
         return combined / (double)(1L << 53);
+    }
+
+    @Override
+    public IterationState generateNextStep() {
+        double x = nextDouble();
+        double y = nextDouble();
+
+        currentIteration++;
+
+        return new IterationState(x, y, currentIteration);
     }
 
 }
