@@ -53,6 +53,8 @@ public class mainSceneController {
 
     private volatile boolean isRunning = false;
 
+    private boolean isSaved = false;
+
     @FXML
     void initialize(){
         gc = mainCanvas.getGraphicsContext2D();
@@ -158,12 +160,12 @@ public class mainSceneController {
 
     @FXML
     public void quickGeneration(){
-        long samples = checkSamples();
 
+        long samples = checkSamples();
         long seed = checkSeed();
 
-        PCG32 rng = new PCG32(seed, 54L);
-        GeneratorContext generatorContext = new GeneratorContext(rng);
+        rng = new PCG32(seed, 54L);
+        generatorContext = new GeneratorContext(rng);
         generatorContext.startGeneration(samples);
 
         StringBuilder massage = new StringBuilder();
@@ -263,6 +265,8 @@ public class mainSceneController {
         } catch (IOException e) {
             showInfo(Alert.AlertType.ERROR, "Помилка збереження",   "Помилка при записі у файл: " + e.getMessage());
         }
+
+        isSaved = true;
     }
 
 }
