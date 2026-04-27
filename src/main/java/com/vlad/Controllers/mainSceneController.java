@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
@@ -42,6 +43,10 @@ public class mainSceneController {
     private Label errorUnderZeroLabel;
     @FXML
     private Label errorNotNumberLabel;
+    @FXML
+    private ProgressIndicator loadingIndicator;
+    @FXML
+    private VBox controlPanel;
 
     private long paintedDots;
 
@@ -174,70 +179,85 @@ public class mainSceneController {
     }
 
     @FXML
-    public void quickGeneration(){
-
+    public void quickGeneration() {
         long samples = checkSamples();
         long seed = checkSeed();
+        if (samples <= 0) return;
 
+        // 1. Вмикаємо анімацію
+        setLoadingState(true);
+
+        // 2. Фоновий потік
+        Thread quickGenThread = new Thread(() -> {
             rng = new PCG32(seed, 54L);
             generatorContext = new GeneratorContext(rng);
             generatorContext.startGeneration(samples);
 
-        StringBuilder massage = new StringBuilder();
-        List<IterationState> history = generatorContext.getHistory();
-        int size = history.size();
-        if(size > 50){
-            massage.append("Перші 50 чисел ");
-            size = 50;
-        }
-        else{
-            String partOne;
-            String partTwo;
-            if(size == 1){
-                partOne = "Перше ";
-                partTwo = " число ";
-            }
-            else if(size == 2 || size == 3 || size == 4){
-                partOne = "Перші ";
-                partTwo = " числа ";
-            }
-            else{
-                partOne = "Перші ";
-                partTwo = " чисел ";
-            }
-            massage.append(partOne).append(size).append(partTwo);
-        }
+            StringBuilder massage = new StringBuilder();
+            List<IterationState> history = generatorContext.getHistory();
+            int size = history.size();
 
-        for(int i = 0; i < size; i++){
-            massage.append(history.get(i).getXValue()).append(" ");
-        }
+            if(size > 50){
+                massage.append("Перші 50 чисел ");
+                size = 50;
+            } else {
+                String partOne;
+                String partTwo;
+                if(size == 1){
+                    partOne = "Перше ";
+                    partTwo = " число ";
+                } else if(size == 2 || size == 3 || size == 4){
+                    partOne = "Перші ";
+                    partTwo = " числа ";
+                } else {
+                    partOne = "Перші ";
+                    partTwo = " чисел ";
+                }
+                massage.append(partOne).append(size).append(partTwo);
+            }
 
-        showInfo(Alert.AlertType.INFORMATION, "Генерація завершена", massage.toString());
+            for(int i = 0; i < size; i++){
+                massage.append(history.get(i).getXValue()).append(" ");
+            }
+
+            // 3. Повертаємось на UI потік
+            Platform.runLater(() -> {
+                setLoadingState(false);
+                showInfo(Alert.AlertType.INFORMATION, "Генерація завершена", massage.toString());
+            });
+        });
+
+        quickGenThread.setDaemon(true);
+        quickGenThread.start();
     }
 
     @FXML
     public void runExperiment() {
         long samples = checkSamples();
         long seed = checkSeed();
+        if (samples <= 0) return;
 
-        // Якщо введені дані некоректні (checkSamples поверне 0), перериваємо виконання
-        if (samples <= 0) {
-            return;
-        }
+        // 1. Вмикаємо анімацію та блокуємо UI
+        setLoadingState(true);
 
-        // Створюємо генератор та аналізатор
-        PCG32 rng = new PCG32(seed, 54L);
-        com.vlad.Model.ExperimentAnalyzer analyzer = new com.vlad.Model.ExperimentAnalyzer();
+        // 2. Запускаємо важкі розрахунки у фоні
+        Thread experimentThread = new Thread(() -> {
+            PCG32 rng = new PCG32(seed, 54L);
+            com.vlad.Model.ExperimentAnalyzer analyzer = new com.vlad.Model.ExperimentAnalyzer();
 
-        // Запускаємо експеримент (перетворюємо long у int, оскільки аналізатор приймає int)
-        double timeInNanoseconds = analyzer.runPerformanceExperiment(rng, (int) samples);
+            double timeInNanoseconds = analyzer.runPerformanceExperiment(rng, (int) samples);
+            double timeInMilliseconds = timeInNanoseconds / 1_000_000.0;
+            String message = String.format("Згенеровано чисел: %d\nВитрачено часу: %.4f мс", samples, timeInMilliseconds);
 
-        // Переводимо наносекунди в мілісекунди для зручності
-        double timeInMilliseconds = timeInNanoseconds / 1_000_000.0;
+            // 3. Повертаємося на головний потік, щоб показати результат і вимкнути анімацію
+            Platform.runLater(() -> {
+                setLoadingState(false);
+                showInfo(Alert.AlertType.INFORMATION, "Результати тестування", message);
+            });
+        });
 
-        // Формуємо повідомлення та виводимо його
-        String message = String.format("Згенеровано чисел: %d\nВитрачено часу: %.4f мс", samples, timeInMilliseconds);
-        showInfo(Alert.AlertType.INFORMATION, "Результати тестування", message);
+        experimentThread.setDaemon(true);
+        experimentThread.start();
     }
 
     @FXML
@@ -255,6 +275,11 @@ public class mainSceneController {
     @FXML
     public void stopDrawing(){
         isRunning = false;
+    }
+
+    private void setLoadingState(boolean isLoading) {
+        loadingIndicator.setVisible(isLoading); // Показуємо/ховаємо крутилку
+        controlPanel.setDisable(isLoading);     // Блокуємо/розблоковуємо всі кнопки зліва
     }
 
     @FXML

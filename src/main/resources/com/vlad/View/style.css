@@ -131,3 +131,11 @@
 .custom-alert.dialog-pane .button:hover {
     -fx-background-color: #7aa2e1;
 }
+
+/* Колір індикатора завантаження */
+.progress-indicator .progress {
+    -fx-progress-color: #89b4fa;
+}
+.progress-indicator .percentage {
+    -fx-fill: transparent; /* Ховаємо цифри відсотків, бо у нас невизначений прогрес */
+}
