@@ -1,0 +1,110 @@
+/* Загальний стиль для головної панелі */
+.root {
+    -fx-background-color: #2b2b2b;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* Стиль для написів (Label) */
+.label {
+    -fx-text-fill: #e0e0e0;
+    -fx-font-size: 13px;
+}
+
+/* Стиль для кнопок */
+.button {
+    -fx-background-color: #4a4a4a;
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #5a5a5a;
+}
+
+.button:pressed {
+    -fx-background-color: #3a3a3a;
+}
+
+/* Окремий стиль для кнопки "Почати" (startButton) */
+#startButton {
+    -fx-background-color: #28a745;
+    -fx-font-weight: bold;
+}
+
+#startButton:hover {
+    -fx-background-color: #218838;
+}
+
+/* Окремий стиль для кнопки "Зупинити" (stopButton) */
+#stopButton {
+    -fx-background-color: #dc3545;
+}
+
+#stopButton:hover {
+    -fx-background-color: #c82333;
+}
+
+/* Окремий стиль для кнопки "Продовжити" (continueButton) */
+#continueButton {
+    -fx-background-color: #007bff;
+}
+
+#continueButton:hover {
+    -fx-background-color: #0069d9;
+}
+
+/* Стиль для текстових областей (TextArea) */
+.text-area {
+    -fx-control-inner-background: #3c3f41;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #808080;
+    -fx-background-color: #4b4b4b;
+    -fx-background-radius: 3;
+}
+
+.text-area .content {
+    -fx-background-color: transparent;
+}
+
+/* Стиль для слайдера (Slider) */
+.slider .track {
+    -fx-background-color: #4a4a4a;
+}
+
+.slider .thumb {
+    -fx-background-color: #007bff;
+}
+
+/* Стиль для меню (MenuBar) */
+.menu-bar {
+    -fx-background-color: #333333;
+}
+
+.menu-bar .label {
+    -fx-text-fill: white;
+}
+
+.context-menu {
+    -fx-background-color: #3c3f41;
+}
+
+.menu-item .label {
+    -fx-text-fill: white;
+}
+
+.menu-item:focused {
+    -fx-background-color: #4b4b4b;
+}
+
+/* Повідомлення про помилки */
+#errorUnderZeroLabel, #errorNotNumberLabel {
+    -fx-text-fill: #ff6b6b;
+    -fx-font-size: 11px;
+}
+
+/* Рамка для Canvas */
+#mainCanvas {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
+}

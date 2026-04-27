@@ -10,7 +10,7 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vlad.Controllers.mainSceneController">
+<AnchorPane prefHeight="500.0" prefWidth="800.0" stylesheets="style.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vlad.Controllers.mainSceneController">
    <children>
       <Canvas fx:id="mainCanvas" height="269.0" layoutX="562.0" layoutY="31.0" width="297.0" />
       <Button fx:id="startButton" layoutX="65.0" layoutY="321.0" mnemonicParsing="false" onAction="#startDrawing" prefHeight="24.0" prefWidth="160.0" text="Почати візуалізацію" />
@@ -31,7 +31,6 @@
         <menus>
           <Menu mnemonicParsing="false" text="Файл">
             <items>
-              <MenuItem mnemonicParsing="false" text="Зберегти" />
                   <MenuItem mnemonicParsing="false" onAction="#saveToFile" text="Зберегти як" />
             </items>
           </Menu>
