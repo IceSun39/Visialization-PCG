@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.PrintWriter;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class mainSceneController {
 
@@ -133,30 +134,51 @@ public class mainSceneController {
     }
 
     @FXML
-    public void startDrawing(ActionEvent event) throws IOException {
-        isRunning = true;
-
+    public void startDrawing(ActionEvent event) {
         long samples = checkSamples();
-
         long seed = checkSeed();
+        if (samples <= 0) return;
 
+        // Починаємо з нуля: створюємо нові об'єкти
         rng = new PCG32(seed, 54L);
         generatorContext = new GeneratorContext(rng);
 
-        // Створюємо новий потік, щоб інтерфейс не зависав
+        // Очищаємо полотно і лічильники перед новим малюванням
+        clearCanvas();
+
+        // Запускаємо малювання
+        runDrawingThread(samples);
+    }
+
+    @FXML
+    public void continueDrawing(ActionEvent event) {
+        long samples = checkSamples();
+        if (samples <= 0) return;
+
+        // Якщо користувач натиснув "Продовжити", але ще нічого не було створено
+        if (rng == null || generatorContext == null) {
+            startDrawing(event);
+            return;
+        }
+
+        // Продовжуємо малювання (не створюємо new PCG32 і не очищаємо екран)
+        runDrawingThread(samples);
+    }
+
+    // Виносимо логіку потоку в окремий метод
+    private void runDrawingThread(long samples) {
+        isRunning = true;
+        seedArea.setEditable(false);
+
         Thread paintThread = new Thread(() -> {
             for (long i = paintedDots; i < samples; i++) {
-                if(!isRunning){
-                    seedArea.setEditable(true);
+                if (!isRunning) {
                     break;
                 }
-
-                seedArea.setEditable(false);
 
                 generatorContext.performSingleStep();
                 IterationState currentStep = generatorContext.getHistory().getLast();
 
-                // Малюємо через Platform.runLater
                 Platform.runLater(() -> {
                     gc.fillRect(currentStep.getXValue() * mainCanvas.getWidth(), currentStep.getYValue() * mainCanvas.getHeight(), 1, 1);
                     paintedDots += 1;
@@ -166,28 +188,33 @@ public class mainSceneController {
                 try {
                     double sliderValue = speedSlider.getValue();
                     long delay = (long) (101 - sliderValue);
-
                     Thread.sleep(delay);
                 } catch (InterruptedException e) {
-                    seedArea.setEditable(true);
-                    break; // Вихід, якщо потік перервано
+                    break;
                 }
             }
+
+            // Коли цикл завершився (або його зупинили), розблоковуємо поле зерна
+            Platform.runLater(() -> seedArea.setEditable(true));
         });
+
         paintThread.setDaemon(true);
         paintThread.start();
     }
 
     @FXML
     public void quickGeneration() {
+        // Якщо йде генерація, то призупинити
+        isRunning = false;
+
         long samples = checkSamples();
         long seed = checkSeed();
         if (samples <= 0) return;
 
-        // 1. Вмикаємо анімацію
+        // Вмикаємо анімацію
         setLoadingState(true);
 
-        // 2. Фоновий потік
+        // Фоновий потік
         Thread quickGenThread = new Thread(() -> {
             rng = new PCG32(seed, 54L);
             generatorContext = new GeneratorContext(rng);
@@ -220,7 +247,7 @@ public class mainSceneController {
                 massage.append(history.get(i).getXValue()).append(" ");
             }
 
-            // 3. Повертаємось на UI потік
+            // Повертаємось на UI потік
             Platform.runLater(() -> {
                 setLoadingState(false);
                 showInfo(Alert.AlertType.INFORMATION, "Генерація завершена", massage.toString());
@@ -233,14 +260,17 @@ public class mainSceneController {
 
     @FXML
     public void runExperiment() {
+        // Якщо йде генерація, то призупинити
+        isRunning = false;
+
         long samples = checkSamples();
         long seed = checkSeed();
         if (samples <= 0) return;
 
-        // 1. Вмикаємо анімацію та блокуємо UI
+        // Вмикаємо анімацію та блокуємо UI
         setLoadingState(true);
 
-        // 2. Запускаємо важкі розрахунки у фоні
+        // Запускаємо важкі розрахунки у фоні
         Thread experimentThread = new Thread(() -> {
             PCG32 rng = new PCG32(seed, 54L);
             com.vlad.Model.ExperimentAnalyzer analyzer = new com.vlad.Model.ExperimentAnalyzer();
@@ -285,28 +315,47 @@ public class mainSceneController {
     @FXML
     public void saveToFile() {
         if (generatorContext == null || generatorContext.getHistory().isEmpty()) {
-            showInfo(Alert.AlertType.ERROR,"Помилка збереження", "Немає даних для збереження!");
+            showInfo(Alert.AlertType.ERROR, "Помилка збереження", "Немає даних для збереження!");
             return;
         }
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Зберегти результати генерації");
-
-
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Текстові файли (*.txt)", "*.txt"),
                 new FileChooser.ExtensionFilter("CSV файли (*.csv)", "*.csv")
         );
 
-        // Відкриваємо вікно "Зберегти як"
         File file = fileChooser.showSaveDialog(mainCanvas.getScene().getWindow());
 
         if (file != null) {
-            saveData(file);
+            // ВАЖЛИВО: Отримуємо дані з UI ДО запуску фонового потоку
+            String seedText = seedArea.getText().trim();
+            // Створюємо копію історії, щоб уникнути помилок доступу, якщо генерація триває
+            List<IterationState> historyCopy = new ArrayList<>(generatorContext.getHistory());
+
+            setLoadingState(true);
+
+            Thread saveThread = new Thread(() -> {
+                try {
+                    performBackgroundSave(file, historyCopy, seedText);
+                    Platform.runLater(() -> {
+                        setLoadingState(false);
+                        showInfo(Alert.AlertType.INFORMATION, "Успіх", "Дані збережено успішно.");
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        setLoadingState(false);
+                        showInfo(Alert.AlertType.ERROR, "Помилка", "Не вдалося зберегти файл: " + e.getMessage());
+                    });
+                }
+            });
+            saveThread.setDaemon(true);
+            saveThread.start();
         }
     }
 
-    private void saveData(File file) {
+    private void performBackgroundSave(File file, List<IterationState> history, String seed) throws IOException {
         String fileName = file.getName().toLowerCase();
         String delimiter = fileName.endsWith(".csv") ? ";" : " ";
 
@@ -315,23 +364,13 @@ public class mainSceneController {
                 writer.println("Iteration" + delimiter + "X");
             }
 
-            for (IterationState state : generatorContext.getHistory()) {
-                writer.printf("%d%s%.10f%n",
-                        state.getIterationNumber(),
-                        delimiter,
-                        state.getXValue()
-                );
+            for (IterationState state : history) {
+                writer.printf("%d%s%.10f%n", state.getIterationNumber(), delimiter, state.getXValue());
             }
 
-            // Додаємо вивід зерна в кінець файлу
-            writer.println(); // Порожній рядок для розділення
-            writer.println("Seed: " + seedArea.getText().trim());
-
-        } catch (IOException e) {
-            showInfo(Alert.AlertType.ERROR, "Помилка збереження",   "Помилка при записі у файл: " + e.getMessage());
+            writer.println();
+            writer.println("Seed: " + seed);
         }
-
-        isSaved = true;
     }
 
 }

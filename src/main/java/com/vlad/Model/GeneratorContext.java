@@ -1,6 +1,6 @@
 package com.vlad.Model;
 
-import java.util.ArrayList; // Додайте цей імпорт
+import java.util.ArrayList;
 import java.util.List;
 
 public class GeneratorContext {

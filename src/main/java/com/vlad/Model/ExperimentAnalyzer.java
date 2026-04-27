@@ -2,11 +2,12 @@ package com.vlad.Model;
 
 
 public class ExperimentAnalyzer {
-    public double runPerformanceExperiment(PseudoRandomGenerator generator, int iterations){
+    public double runPerformanceExperiment(PseudoRandomGenerator generator, long iterations){
         double startTime = System.nanoTime();
 
-        GeneratorContext generatorContext = new GeneratorContext(generator);
-        generatorContext.startGeneration(iterations);
+        for(long i = 0; i < iterations; i++){
+            generator.nextInt();
+        }
 
         double endTime = System.nanoTime();
 

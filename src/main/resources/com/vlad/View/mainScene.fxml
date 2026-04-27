@@ -7,13 +7,13 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="550.0" prefWidth="850.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vlad.Controllers.mainSceneController">
     <top>
@@ -62,7 +62,7 @@
 
                 <VBox spacing="10.0">
                     <Button fx:id="startButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#startDrawing" styleClass="btn-primary" text="Почати візуалізацію" />
-                    <Button fx:id="continueButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#startDrawing" styleClass="btn-info" text="Продовжити" />
+                    <Button fx:id="continueButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#continueDrawing" styleClass="btn-info" text="Продовжити" />
                     <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#quickGeneration" styleClass="btn-secondary" text="Швидко створити" />
 
                     <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#runExperiment" styleClass="btn-secondary" text="Тест продуктивності" />
@@ -78,14 +78,14 @@
         <VBox alignment="CENTER" spacing="15.0" styleClass="canvas-container" BorderPane.alignment="CENTER">
             <children>
                 <StackPane>
-                    <Canvas fx:id="mainCanvas" height="400.0" width="500.0" styleClass="canvas-view"/>
-                    <ProgressIndicator fx:id="loadingIndicator" visible="false" maxHeight="50.0" maxWidth="50.0" />
+                    <Canvas fx:id="mainCanvas" height="400.0" styleClass="canvas-view" width="500.0" />
+                    <ProgressIndicator fx:id="loadingIndicator" maxHeight="50.0" maxWidth="50.0" visible="false" />
                 </StackPane>
 
                 <HBox alignment="CENTER" spacing="10.0">
                     <children>
-                        <Label text="Кількість намальованих точок:" styleClass="canvas-label"/>
-                        <Label fx:id="countPaintedDots" text="0" styleClass="highlight-label" />
+                        <Label styleClass="canvas-label" text="Кількість намальованих точок:" />
+                        <Label fx:id="countPaintedDots" styleClass="highlight-label" text="0" />
                     </children>
                 </HBox>
             </children>
