@@ -71,6 +71,21 @@ public class mainSceneController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(massage);
+
+        // Отримуємо панель діалогу та додаємо наш CSS
+        DialogPane dialogPane = alert.getDialogPane();
+
+        try {
+            // Завантажуємо style.css тим самим шляхом, що й для головної сцени
+            String cssPath = getClass().getResource("/com/vlad/View/style.css").toExternalForm();
+            dialogPane.getStylesheets().add(cssPath);
+
+            // Задаємо кастомний клас для Alert, щоб стилі не конфліктували
+            dialogPane.getStyleClass().add("custom-alert");
+        } catch (NullPointerException e) {
+            System.err.println("Не вдалося знайти файл стилів для Alert.");
+        }
+
         alert.showAndWait();
     }
 
@@ -198,6 +213,31 @@ public class mainSceneController {
         }
 
         showInfo(Alert.AlertType.INFORMATION, "Генерація завершена", massage.toString());
+    }
+
+    @FXML
+    public void runExperiment() {
+        long samples = checkSamples();
+        long seed = checkSeed();
+
+        // Якщо введені дані некоректні (checkSamples поверне 0), перериваємо виконання
+        if (samples <= 0) {
+            return;
+        }
+
+        // Створюємо генератор та аналізатор
+        PCG32 rng = new PCG32(seed, 54L);
+        com.vlad.Model.ExperimentAnalyzer analyzer = new com.vlad.Model.ExperimentAnalyzer();
+
+        // Запускаємо експеримент (перетворюємо long у int, оскільки аналізатор приймає int)
+        double timeInNanoseconds = analyzer.runPerformanceExperiment(rng, (int) samples);
+
+        // Переводимо наносекунди в мілісекунди для зручності
+        double timeInMilliseconds = timeInNanoseconds / 1_000_000.0;
+
+        // Формуємо повідомлення та виводимо його
+        String message = String.format("Згенеровано чисел: %d\nВитрачено часу: %.4f мс", samples, timeInMilliseconds);
+        showInfo(Alert.AlertType.INFORMATION, "Результати тестування", message);
     }
 
     @FXML

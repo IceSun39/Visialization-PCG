@@ -61,8 +61,11 @@
                 <VBox spacing="10.0">
                     <Button fx:id="startButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#startDrawing" styleClass="btn-primary" text="Почати візуалізацію" />
                     <Button fx:id="continueButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#startDrawing" styleClass="btn-info" text="Продовжити" />
-                    <Button fx:id="stopButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#stopDrawing" styleClass="btn-danger" text="Зупинити" />
                     <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#quickGeneration" styleClass="btn-secondary" text="Швидко створити" />
+
+                    <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#runExperiment" styleClass="btn-secondary" text="Тест продуктивності" />
+
+                    <Button fx:id="stopButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#stopDrawing" styleClass="btn-danger" text="Зупинити" />
                     <Button fx:id="clearButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#clearCanvas" styleClass="btn-warning" text="Очистити" />
                 </VBox>
             </children>
