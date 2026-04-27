@@ -33,9 +33,9 @@ public class mainSceneController {
     @FXML
     private Slider speedSlider;
     @FXML
-    private TextArea countArea  ;
+    private TextField countArea;
     @FXML
-    private  TextArea seedArea;
+    private TextField seedArea;
     @FXML
     private Label countPaintedDots;
     @FXML
@@ -164,9 +164,9 @@ public class mainSceneController {
         long samples = checkSamples();
         long seed = checkSeed();
 
-        rng = new PCG32(seed, 54L);
-        generatorContext = new GeneratorContext(rng);
-        generatorContext.startGeneration(samples);
+            rng = new PCG32(seed, 54L);
+            generatorContext = new GeneratorContext(rng);
+            generatorContext.startGeneration(samples);
 
         StringBuilder massage = new StringBuilder();
         List<IterationState> history = generatorContext.getHistory();

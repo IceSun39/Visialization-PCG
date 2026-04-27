@@ -15,7 +15,7 @@ public class Main extends Application {
 
             Parent root = FXMLLoader.load(getClass().getResource("/com/vlad/View/mainScene.fxml"));
             stage.setTitle("Генератор PCG");
-            stage.setScene(new Scene(root, 900, 500));
+            stage.setScene(new Scene(root, 1000, 800));
 
             stage.setOnCloseRequest(event -> {
                 event.consume();
