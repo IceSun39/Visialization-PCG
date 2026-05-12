@@ -250,7 +250,35 @@ public class mainSceneController {
             // Повертаємось на UI потік
             Platform.runLater(() -> {
                 setLoadingState(false);
-                showInfo(Alert.AlertType.INFORMATION, "Генерація завершена", massage.toString());
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Генерація завершена");
+                alert.setHeaderText(null);
+                alert.setContentText(massage.toString());
+
+
+                DialogPane dialogPane = alert.getDialogPane();
+                try {
+                    String cssPath = getClass().getResource("/com/vlad/View/style.css").toExternalForm();
+                    dialogPane.getStylesheets().add(cssPath);
+                    dialogPane.getStyleClass().add("custom-alert");
+                } catch (NullPointerException e) {
+                    System.err.println("Не вдалося знайти файл стилів для Alert.");
+                }
+
+                // Створюємо кнопки: кастомну для експорту та стандартну ОК
+                ButtonType btnExport = new ButtonType("Експортувати");
+                ButtonType btnOk = new ButtonType("ОК", ButtonBar.ButtonData.OK_DONE);
+
+                // Додаємо кнопки у вікно
+                alert.getButtonTypes().setAll(btnExport, btnOk);
+
+                // Показуємо вікно та обробляємо натискання
+                alert.showAndWait().ifPresent(type -> {
+                    if (type == btnExport) {
+                        saveToFile(); // Викликаємо існуючий метод експорту, якщо натиснули кнопку експорту
+                    }
+                });
             });
         });
 
