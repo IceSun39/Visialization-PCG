@@ -105,7 +105,7 @@ public class mainSceneController {
                 throw new IllegalArgumentException();
             }
 
-        // Якщо нічого не ввели або ввели не число
+        // Якщо нічого не ввели або ввели не числоfillRect
         } catch (NumberFormatException e) {
             showInfo(Alert.AlertType.ERROR, "Помилка введення", "Кількість точок повинна бути числом!");
             isRunning = false;
@@ -307,7 +307,7 @@ public class mainSceneController {
             double timeInMilliseconds = timeInNanoseconds / 1_000_000.0;
             String message = String.format("Згенеровано чисел: %d\nВитрачено часу: %.4f мс", samples, timeInMilliseconds);
 
-            // 3. Повертаємося на головний потік, щоб показати результат і вимкнути анімацію
+            // Повертаємося на головний потік, щоб показати результат і вимкнути анімацію
             Platform.runLater(() -> {
                 setLoadingState(false);
                 showInfo(Alert.AlertType.INFORMATION, "Результати тестування", message);

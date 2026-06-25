@@ -24,11 +24,6 @@
                         <MenuItem mnemonicParsing="false" onAction="#saveToFile" text="Зберегти як" />
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Допомога">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Про програму" />
-                    </items>
-                </Menu>
             </menus>
         </MenuBar>
     </top>
